@@ -1,0 +1,104 @@
+{
+    "name": "HTTP to Sheets & Gemini AI",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "my-webhook",
+                "options": {}
+            },
+            "id": "1",
+            "name": "HTTP POST Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Process incoming HTTP POST data and extract name, email, and message\nlet results = [];\n\nfor (const item of $input.all()) {\n  let name = item.json.body?.name || \"No name provided\";\n  let email = item.json.body?.email || \"No email provided\";\n  let message = item.json.body?.message || \"No message provided\";\n  \n  results.push({\n    json: {\n      name: name,\n      email: email,\n      message: message,\n      processedAt: new Date().toISOString()\n    }\n  });\n}\n\nreturn results;"
+            },
+            "id": "2",
+            "name": "Script node",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "value": "1BRuCEJySqbLK7eGS65GM4ymGfmHfHR0edQCbGY-jI3Q"
+                },
+                "sheetName": {
+                    "value": "Sheet1"
+                },
+                "options": {}
+            },
+            "id": "3",
+            "name": "Google Sheets node",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 3,
+            "position": [
+                650,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "resource": "text",
+                "operation": "generate",
+                "prompt": "=Please summarize the following message:\n\n{{$json.message}}",
+                "options": {}
+            },
+            "id": "4",
+            "name": "Gemini AI node",
+            "type": "n8n-nodes-base.googleGemini",
+            "typeVersion": 1,
+            "position": [
+                850,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "HTTP POST Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Script node",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Script node": {
+            "main": [
+                [
+                    {
+                        "node": "Google Sheets node",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Sheets node": {
+            "main": [
+                [
+                    {
+                        "node": "Gemini AI node",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
