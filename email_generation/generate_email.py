@@ -84,7 +84,7 @@ def build_prompt(lead: dict) -> str:
 
 
 # ── Mock CRM save (CSV) ───────────────────────────────────────────────────────
-CRM_FILE = "mock_crm.csv"
+CRM_FILE = os.path.join(os.path.dirname(__file__), "mock_crm.csv")
 CRM_COLS = ["name", "email", "message", "status", "intent", "urgency",
             "generated_email", "timestamp"]
 
