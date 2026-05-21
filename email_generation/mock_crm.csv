@@ -1,0 +1,23 @@
+name,email,message,status,intent,urgency,generated_email,timestamp
+John Smith,john.smith@company.com,"I need help with my account, this is urgent.",valid,Support,High,"Hello John Smith,
+
+Thank you for your message.
+
+We identified your request as Support with High priority.
+We completely understand your situation and have flagged this as a priority. A specialist will contact you within a few hours.
+
+Our team will contact you shortly.
+
+Best regards,
+Team",2026-05-21T22:54:36
+Emily Johnson,emily.johnson@startup.io,I want to buy your product for our team.,valid,Sales,Low,"Hello Emily Johnson,
+
+Thank you for your message.
+
+We identified your request as Sales with Low priority.
+We would be happy to provide you with detailed information and pricing. A specialist will contact you at a convenient time.
+
+Our team will contact you shortly.
+
+Best regards,
+Team",2026-05-21T22:54:36
