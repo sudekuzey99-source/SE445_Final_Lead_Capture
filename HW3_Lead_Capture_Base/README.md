@@ -54,21 +54,21 @@ To run the full workflow, execute these two scripts in separate terminal session
 ```bash
 curl -X POST http://127.0.0.1:5000/webhook \
 -H "Content-Type: application/json" \
--d '{"name": "Sude Naz Kuzay", "email": "sude@gmail.com", "message": "I want to buy your product asap!"}'
+-d '{"name": "SE445 Final Project Team", "email": "sude@gmail.com", "message": "I want to buy your product asap!"}'
 ```
 
 ### 2. Missing Email
 ```bash
 curl -X POST http://127.0.0.1:5000/webhook \
 -H "Content-Type: application/json" \
--d '{"name": "Sude Naz Kuzay", "message": "Need help with my account."}'
+-d '{"name": "SE445 Final Project Team", "message": "Need help with my account."}'
 ```
 
 ### 3. Invalid Email Format
 ```bash
 curl -X POST http://127.0.0.1:5000/webhook \
 -H "Content-Type: application/json" \
--d '{"name": "Sude Naz Kuzay", "email": "wrong-email-format", "message": "Can we discuss a partnership?"}'
+-d '{"name": "SE445 Final Project Team", "email": "wrong-email-format", "message": "Can we discuss a partnership?"}'
 ```
 
 ---
