@@ -20,7 +20,7 @@ The final lead record follows this structure:
 }
 ```
 
-Project Structure
+## Project Structure
 
 HW3_Lead_Capture_Base/ : Base HW3 lead capture workflow
 validation/ : Part 2 validation logic
@@ -28,7 +28,8 @@ classification/ : Part 3 intent and urgency classification
 email_generation/ : Part 4 personalized email generation and mock CRM output
 screenshots/ : Validation output screenshot
 .gitignore : Ignore rules for cache and system files
-Storage
+
+## Storage
 
 Storage is simulated using mock_crm.csv inside the email_generation folder.
 
@@ -40,8 +41,8 @@ message
 status
 intent
 urgency
-Documentation
 
+## Documentation
 The Word report should include:
 
 workflow explanation
@@ -51,8 +52,8 @@ AI email generation logic
 data schema
 GitHub repository link
 screenshots
-Team Notes
 
+## Team Notes
 Each project part is organized in a separate folder.
 
 Before making changes, each team member should run:
