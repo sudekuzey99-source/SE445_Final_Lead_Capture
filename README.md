@@ -10,7 +10,6 @@ Webhook/Input → Validation → AI Classification → AI Email Generation → S
 
 The final lead record follows this structure:
 
-```json
 {
   "name": "",
   "email": "",
@@ -19,8 +18,10 @@ The final lead record follows this structure:
   "intent": "",
   "urgency": ""
 }
+```
 
 Project Structure
+
 HW3_Lead_Capture_Base/ : Base HW3 lead capture workflow
 validation/ : Part 2 validation logic
 classification/ : Part 3 intent and urgency classification
