@@ -9,7 +9,7 @@ Webhook/Input → Validation → AI Classification → AI Email Generation → S
 ## Data Schema
 
 The final lead record follows this structure:
-
+```json
 {
   "name": "",
   "email": "",
