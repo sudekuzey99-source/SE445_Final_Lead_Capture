@@ -1,0 +1,107 @@
+{
+  "name": "SE445 Lead Capture — Full Pipeline (Parts 1-5)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "0d53b867-2174-4416-a285-626b06e1bfa9",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 0],
+      "id": "ab7c7488-5879-4071-af8f-8510b98cb7cc",
+      "name": "Part 1 – Webhook Input",
+      "webhookId": "0d53b867-2174-4416-a285-626b06e1bfa9",
+      "notes": "Receives POST requests with name, email, message fields."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "python",
+        "code": "import re\n\nlead = items[0].json\nerrors = []\n\nname = lead.get('name', '')\nif not name or str(name).strip() == '':\n    errors.append('Name is missing or empty.')\n\nemail = lead.get('email', '')\nif not email or str(email).strip() == '':\n    errors.append('Email is missing or empty.')\nelse:\n    if not re.match(r'^[\\w\\.-]+@[\\w\\.-]+\\.\\w+$', str(email).strip()):\n        errors.append('Email format is invalid.')\n\nmessage = lead.get('message', '')\nif not message or str(message).strip() == '':\n    errors.append('Message is missing or empty.')\n\nresult = dict(lead)\nif errors:\n    result['status'] = 'Invalid'\n    result['validation_errors'] = errors\nelse:\n    result['status'] = 'Valid'\n    result['validation_errors'] = []\n\nreturn [{'json': result}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0],
+      "id": "b1c2d3e4-0001-0001-0001-000000000001",
+      "name": "Part 2 – Validation Logic",
+      "notes": "Validates name, email, message. Adds status and validation_errors. Invalid leads are NOT discarded."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "python",
+        "code": "lead = items[0].json\nmessage = lead.get('message', '').lower()\n\nintent = 'Unknown'\nurgency = 'Medium'\n\nif any(w in message for w in ['help','support','issue','broken','fix']):\n    intent = 'Support'\nelif any(w in message for w in ['buy','purchase','price','pricing','sales']):\n    intent = 'Sales'\nelif any(w in message for w in ['collaborate','partner','partnership','join']):\n    intent = 'Partnership'\n\nif any(w in message for w in ['urgent','asap','immediately','emergency','fast']):\n    urgency = 'High'\nelif any(w in message for w in ['no rush','whenever','low priority','take your time']):\n    urgency = 'Low'\n\nlead['intent'] = intent\nlead['urgency'] = urgency\n\nreturn [{'json': lead}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "id": "b1c2d3e4-0002-0002-0002-000000000002",
+      "name": "Part 3 – AI Classification",
+      "notes": "Keyword-based intent (Support/Sales/Partnership) and urgency (High/Medium/Low) detection."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "python",
+        "code": "import datetime\n\nlead = items[0].json\n\nif lead.get('status') \!= 'Valid':\n    return [{'json': lead}]\n\nname    = lead.get('name', 'Customer')\nintent  = lead.get('intent', 'General')\nurgency = lead.get('urgency', 'Medium')\n\ntime_map = {'High': 'within a few hours', 'Medium': 'within 1-2 business days', 'Low': 'at a convenient time'}\ntone_map = {\n    'Support': 'We completely understand your situation and have flagged this as a priority.',\n    'Sales': 'We would be happy to provide you with detailed information and pricing.',\n    'Partnership': 'We are excited about the possibility of working together with your team.',\n}\n\nemail_body = (\n    f'Hello {name},\\n\\n'\n    f'Thank you for your message.\\n\\n'\n    f'We identified your request as {intent} with {urgency} priority.\\n'\n    f'{tone_map.get(intent, \"We will be happy to assist you.\")} '\n    f'A specialist will contact you {time_map.get(urgency, \"shortly\")}.\\n\\n'\n    f'Best regards,\\nTeam'\n)\n\nlead['generated_email'] = email_body\nlead['email_timestamp'] = datetime.datetime.now().isoformat(timespec='seconds')\n\nreturn [{'json': lead}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0],
+      "id": "b1c2d3e4-0003-0003-0003-000000000003",
+      "name": "Part 4 – AI Email Generation",
+      "notes": "Generates a personalised response email based on intent and urgency. Invalid leads pass through unchanged."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "python",
+        "code": "import json, datetime, os\n\nlead = items[0].json\n\n# Storage file path — adjust to your n8n server's filesystem\nSTORAGE_FILE = '/data/processed_leads.json'\n\n# Load existing leads\nif os.path.isfile(STORAGE_FILE):\n    with open(STORAGE_FILE, 'r', encoding='utf-8') as f:\n        try:\n            existing = json.load(f)\n        except Exception:\n            existing = []\nelse:\n    existing = []\n\n# Add storage timestamp\nlead['stored_at'] = datetime.datetime.now().isoformat(timespec='seconds')\n\n# Append and save\nexisting.append(dict(lead))\nwith open(STORAGE_FILE, 'w', encoding='utf-8') as f:\n    json.dump(existing, f, indent=2, ensure_ascii=False)\n\nreturn [{'json': {\n    'result': 'stored',\n    'total_leads': len(existing),\n    'stored_lead': lead\n}}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0],
+      "id": "b1c2d3e4-0004-0004-0004-000000000004",
+      "name": "Part 5 – CRM Lead Storage",
+      "notes": "Appends the enriched lead (valid OR invalid) to processed_leads.json. Never discards data. Adds stored_at timestamp. Adjust STORAGE_FILE path to match your n8n server."
+    }
+  ],
+  "pinData": {
+    "Part 1 – Webhook Input": [
+      {
+        "json": {
+          "name": "Ali",
+          "email": "ali@test.com",
+          "message": "I need help with your service"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Part 1 – Webhook Input": {
+      "main": [[{"node": "Part 2 – Validation Logic", "type": "main", "index": 0}]]
+    },
+    "Part 2 – Validation Logic": {
+      "main": [[{"node": "Part 3 – AI Classification", "type": "main", "index": 0}]]
+    },
+    "Part 3 – AI Classification": {
+      "main": [[{"node": "Part 4 – AI Email Generation", "type": "main", "index": 0}]]
+    },
+    "Part 4 – AI Email Generation": {
+      "main": [[{"node": "Part 5 – CRM Lead Storage", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6f22c448-d773-4611-b4f0-ce237fffc2dc",
+  "meta": {
+    "instanceId": "9a189e0a083646386b97d5d11c1fcff507d346b3d7a9a4c49476e7dd4459e877"
+  },
+  "id": "EC2Ol5Cf8HmlnNtz",
+  "tags": ["SE445", "Part5", "CRM"]
+}
